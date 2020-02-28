@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 	"tinyhttp/tinyhttp"
 )
@@ -9,11 +8,19 @@ import (
 
 func main()  {
 	engine := tinyhttp.New()
-	engine.Get("/hello", func(w http.ResponseWriter, r *http.Request) {
-		for k,v := range r.Header {
-			fmt.Fprintf(w, "Header[%q]=%q\n", k, v)
-		}
+	engine.Get("/", func(c *tinyhttp.Context) {
+		c.HTML(http.StatusOK, "<h1>hello tinyhttp</h1>")
 	})
 
+	engine.Get("/hello", func(c *tinyhttp.Context) {
+		c.String(http.StatusOK, "hello %s, path %s", c.Query("name"), c.Path)
+	})
+
+	engine.Post("/login", func(c *tinyhttp.Context) {
+		c.Json(http.StatusOK, map[string]string{
+			"username": c.PostForm("username"),
+			"password": c.PostForm("password"),
+		})
+	})
 	engine.Run(":9999")
 }
