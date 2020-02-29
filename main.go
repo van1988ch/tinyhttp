@@ -16,6 +16,14 @@ func main()  {
 		c.String(http.StatusOK, "hello %s, path %s", c.Query("name"), c.Path)
 	})
 
+	engine.Get("/hello/:name", func(c *tinyhttp.Context) {
+		c.String(http.StatusOK, "hello %s, path %s", c.Param("name"), c.Path)
+	})
+
+	engine.Get("/assets/*filepath", func(c *tinyhttp.Context) {
+		c.String(http.StatusOK, "hello %s, path %s", c.Param("filepath"), c.Path)
+	})
+
 	engine.Post("/login", func(c *tinyhttp.Context) {
 		c.Json(http.StatusOK, map[string]string{
 			"username": c.PostForm("username"),
