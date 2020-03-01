@@ -1,10 +1,23 @@
 package main
 
 import (
+	"log"
 	"net/http"
+	"time"
 	"tinyhttp/tinyhttp"
 )
 
+
+func onlyForV2() tinyhttp.HandlerFunc {
+	return func(c *tinyhttp.Context) {
+		// Start timer
+		t := time.Now()
+		// if a server error occurred
+		c.Fail(500, "Internal Server Error")
+		// Calculate resolution time
+		log.Printf("[%d] %s in %v for group v2", c.StatusCode, c.Req.RequestURI, time.Since(t))
+	}
+}
 
 func main()  {
 	engine := tinyhttp.New()
@@ -44,6 +57,7 @@ func main()  {
 	}
 
 	v2 := engine.Group("/v2")
+	v2.Use(onlyForV2())
 	{
 		v2.GET("/hello/:name", func(c *tinyhttp.Context) {
 			// expect /hello/geektutu

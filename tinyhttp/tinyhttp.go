@@ -3,6 +3,7 @@ package tinyhttp
 import (
 	"log"
 	"net/http"
+	"strings"
 )
 
 type HandlerFunc func(*Context)
@@ -53,6 +54,10 @@ func (r *RouterGroup) POST(pattern string, handler HandlerFunc) {
 	r.addRouter("POST", pattern, handler)
 }
 
+func (r *RouterGroup)Use(middlewares ...HandlerFunc)  {
+	r.middlewares = append(r.middlewares, middlewares...)
+}
+
 
 func (e *Engine)addRouter(method string, pattern string, handler HandlerFunc){
 	e.router.AddRouter(method, pattern, handler)
@@ -71,6 +76,14 @@ func (e *Engine)Run(addr string)(err error){
 }
 
 func (e *Engine)ServeHTTP(w http.ResponseWriter, req *http.Request){
+	var middlewares []HandlerFunc
+	for _, group := range e.groups {
+		if strings.HasPrefix(req.URL.Path, group.prefix) {
+			middlewares = append(middlewares, group.middlewares...)
+		}
+	}
+
 	c := newContext(w,req)
+	c.handlers = middlewares
 	e.router.Handle(c)
 }

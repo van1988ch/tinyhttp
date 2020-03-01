@@ -13,11 +13,23 @@ type Context struct {
 	Method string
 	Params map[string]string
 	StatusCode int
+
+	handlers []HandlerFunc
+	index int
 }
 
 func (c *Context)Param(key string)string {
 	value, _ := c.Params[key]
 	return value
+}
+
+//中间件可等待用户自己定义的 Handler处理结束后，再做一些额外的操作
+func (c *Context)Next()  {
+	c.index++
+	s := len(c.handlers)
+	for ; c.index < s ; c.index++  {
+		c.handlers[c.index](c)
+	}
 }
 
 func newContext(w http.ResponseWriter, req *http.Request)*Context  {
@@ -26,7 +38,13 @@ func newContext(w http.ResponseWriter, req *http.Request)*Context  {
 		Req:req,
 		Path:req.URL.Path,
 		Method:req.Method,
+		index:-1,
 	}
+}
+
+func (c *Context) Fail(code int, err string) {
+	c.index = len(c.handlers)
+	c.Json(code, map[string]interface{}{"message": err})
 }
 
 func (c *Context)PostForm(key string) string {

@@ -78,8 +78,12 @@ func (r *Router)Handle(c *Context)  {
 	if n != nil {
 		c.Params = params
 		key := c.Method + "-" + n.pattern
-		r.router[key](c)
+		c.handlers = append(c.handlers, r.router[key])
 	} else {
-		c.String(http.StatusNotFound, "404 NOT FOUND:%s\n", c.Req.URL)
+		c.handlers = append(c.handlers, func(c *Context) {
+			c.String(http.StatusNotFound, "404 NOT FOUND: %s\n", c.Path)
+		})
 	}
+
+	c.Next()
 }
