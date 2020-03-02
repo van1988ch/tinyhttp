@@ -7,3 +7,4 @@
 - day-3 trie树管理动态路由
 - day-4 分组group
 - day-5 group中增加middleware机制
+- day-6 支持静态数据
