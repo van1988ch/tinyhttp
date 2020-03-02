@@ -32,8 +32,7 @@ func formatAsDate(t time.Time) string {
 
 func main() {
 
-	engine := tinyhttp.New()
-	engine.Use(tinyhttp.Logger())
+	engine := tinyhttp.Default()
 
 	engine.SetFuncMap(template.FuncMap{
 		"formatAsDate": formatAsDate,
@@ -47,6 +46,12 @@ func main() {
 
 	engine.GET("/", func(c *tinyhttp.Context) {
 		c.HTML(http.StatusOK, "css.tmpl", nil)
+	})
+
+	// index out of range for testing Recovery()
+	engine.GET("/panic", func(c *tinyhttp.Context) {
+		names := []string{"geektutu"}
+		c.String(http.StatusOK, names[100])
 	})
 
 	engine.GET("/students", func(c *tinyhttp.Context) {
